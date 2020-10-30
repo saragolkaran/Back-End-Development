@@ -1,0 +1,174 @@
+<!--Name : Sara Golkaran
+    Class: 1B06
+    Admin Number: P1935657
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Index</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/reset.css">
+</head>
+
+<body style="background-color:pink;">
+    <div class="container">
+        <nav class="nav">
+            <a class="nav-link" href="/home/">Home</a>
+            <a class="nav-link" href="/search/">Search</a>
+            <a class="nav-link" id='logout' href="#">Log Out</a>
+        </nav>
+        <h2 class="">SEARCH</h2>
+        </header>
+
+        <div class="header-bar-search">
+            <form class="">
+                <input type="search" id="search-input">
+                <!-- <button type="submit" id="search-button" class="btn btn-light"> -->
+                <button type="button" id="search">Search!</button>
+                </button>
+            </form>
+
+        </div>
+
+        <div id="search-results">
+        </div>
+
+    </div>
+
+
+    </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const baseUrl = "http://localhost:3000";
+        $(document).ready(function () {
+            const userData = localStorage.getItem('userInfo');
+            var userInfo = JSON.parse(userData);
+            const loggedInUserID = userInfo[0].id;
+            // console.log(loggedInUserID);
+
+            $("#search").click(function (event) { // follow search button
+
+                //prevent page reload
+                event.preventDefault();
+
+                var title = $('#search-input').val(); // follow search bar
+
+                // console.log(title);
+
+                $.ajax({
+                    url: 'http://localhost:3000/search/' + title, // title of listing
+                    type: 'GET',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json", //refers type of data returned back to us 
+                    success: function (data, textStatus, xhr) { // data refers to the results, return results
+                        if (data != null) {
+                            // console.log(data);
+                            window.localStorage.setItem("SearchResults", JSON.stringify(data)) // array of search results
+                            var searchResults = "";
+                            for (var i = 0; i < data.length; i++) { //loop
+                                console.log(data[i])
+                                if (data[i].fk_user_id != loggedInUserID) {
+                                    searchResults += `<div class="card" style="margin-top: 2rem;">
+                                                    <div class="card-body">
+                                                        <p class="card-text"> Username: ${data[i].username}</p>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="card-text"> Title: ${data[i].title}</p>
+                                                    </div>
+                                                    <div class ="card-footer text-muted">
+                                                        <p class = "card-text"> Price: ${data[i].price}
+                                                        </div>
+                                                        <div class="card-footer text-muted">
+                                                        ${data[i].description}
+                                                    </div>
+                                                    <div class="card-footer text-muted">
+                                                        ${data[i].created_at}
+                                                        <br>
+                                                        <button onClick="makeOffer(${i})">Offer</button>
+                                                    </div>
+                                                </div>`
+                                    //"i" is to keep track of the index in the search array
+                                }
+                            }
+                            $("#search-results").html(searchResults);
+                        } else {
+                            // console.log("No result");
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Error in Operation');
+                    }
+                });
+                return false;
+            });
+        });
+        function makeOffer(id) {
+            window.localStorage.setItem('searchResultListingIndex', id)
+            window.location.assign("/offer/");
+
+        }
+
+        // logout
+        $("#logout").click((event) => {
+            // prevents the page from refreshing
+            event.preventDefault();
+
+            const requestBody = {  //empty, log out no need amything
+            };
+
+            // create the post
+            axios.post(`${baseUrl}/user/logout`, requestBody)
+                .then((response) => {
+                    window.localStorage.clear()
+                    window.location.href = "/login/"
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+        });
+
+
+
+
+    </script>
+
+         <!-- Footer -->
+         <footer id="sticky-footer" class="py-4 bg-dark text-white-80">
+            <div class="container text-center">
+                <p>Personal Selling Blog&copy; 2019</p>
+                        <i class="fab fa-instagram"></i></a></p>
+            </div>
+            <!--container-->
+        </footer>
+        <!--end of footer-->
+    
+        <style>
+                html {color: pink;}
+                footer { background: linear-gradient(to top, #33ccff 1%, #ff99cc 100%);}
+    
+            
+                
+    
+        </style>
+    
+
+</body>
+
+</html>

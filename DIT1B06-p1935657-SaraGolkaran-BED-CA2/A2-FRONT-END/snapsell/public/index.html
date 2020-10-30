@@ -1,0 +1,278 @@
+<!--Name : Sara Golkaran
+    Class: 1B06
+    Admin Number: P1935657
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Index</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/reset.css">
+</head>
+
+<body style="background-color:pink;">
+    <div class="container">
+        <nav class="nav">
+            <a class="nav-link" href="/home/">Home</a>
+            <a class="nav-link" href="/search/">Search</a>
+            <a class="nav-link" id='logout' href="#">Log Out</a>
+        </nav>
+
+        <div class="row" style="margin-top: 2rem;">
+            <div class="col-md-8 col-xs-12">
+                <h1>Home</h1>
+                <h2>Create your listings here!</h2>
+
+                <form id="create-post-form" style="margin-top: 2rem;">
+                    <div class="form-group">
+                        <textarea class="form-control" id="create-post-form-body" rows="3"
+                            placeholder="Title of your listing..."></textarea>
+                        <textarea class="form-control" id="description" rows="3"
+                            placeholder="Descriptions..."></textarea>
+                        <textarea class="form-control" id="price" rows="3" placeholder="Price..."></textarea>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create Listing</button>
+                </form>
+                <h1>My Listings</h1>
+                <div class="col-sm">
+                    <div id="listings">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-xs-12">
+                <h2>Offers</h2>
+                <ul id="offers" class="item-group" style="list-style: none; padding-left: 0;">
+                </ul>
+            </div>
+
+
+
+            <div id="offers">
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        // API url
+        const baseUrl = "http://localhost:3000";
+        // hardcoded because we have not added login yet.
+
+        // anything that is written to the local storage will end up a string
+        // localstorage only stores strings
+        // Thus, anything u get back to local storage is returned as a string as well.
+        // if u need to do anything mathematical with it,
+        // u have to convert it to an integer. 
+        //
+        // in the local storage, it look likes this:
+        // {id: 7, title: "Javascript Textbook", description: "In very good condition, rarely use it", price: 60, fk_user_id: 13, …}
+        //
+        // you might think its an json object. But its not. Its a string.
+        // thus u cannot
+        // user.name
+        //
+        // convert to JSON object explicityly
+        //
+        // const userObj = JSON.parse(user);
+        // then u can do a Userobj.username
+        const userData = localStorage.getItem('userInfo');
+        var userInfo = JSON.parse(userData);
+        //console.log(userInfo);
+        //console.log(userInfo[0].id)
+
+
+
+        const loggedInUserID = userInfo[0].id;
+
+        var postUrl = `${baseUrl}/users/${loggedInUserID}/listings`;
+
+        // var postUrl = `http://localhost:3001/users/${loggedInUserID}/listings`;
+
+        console.log("POSTS:")
+        console.log(postUrl);
+
+        //------------------
+        // GET LISTINGS
+        // ----------------
+        axios.get(postUrl)
+            .then(function (response) {
+                console.log("Response is " + response);
+                const posts = response.data;
+                posts.forEach((listings) => {
+                    console.log(listings);
+                    const postHtml = `
+                    <div class="card ml-3" style="margin-top: 2rem; float:left; width: 250px; height: 300px;">
+                        <div class="card-body">
+                            <p class="card-text"> Title: ${listings.title}</p>
+                        </div>
+                        <div class ="card-footer text-muted">
+                            <p class = "card-text"> Price: ${listings.price}<p>
+                            </div>
+                            <div class="card-footer text-muted">
+                            Description: ${listings.description}
+                        </div>
+                        <div class="card-footer text-muted">
+                            ${listings.created_at}
+                        </div>
+                    </div>
+                    `;
+
+                    // $("#listings").append(postHtml);
+                    $(".col-sm").append(postHtml);
+
+                });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+
+        // GET OFFER
+        var postUrl = `${baseUrl}/offers/${loggedInUserID}`;
+        axios.get(postUrl)
+            .then(function (response) {
+                console.log("Response is " + response);
+                const posts = response.data;
+                posts.forEach((offers) => {
+                    console.log(offers);
+                    const postHtml = `
+                    <div class="card" style="margin-top: 2rem;">
+                        <div class="card-body">
+                            <p class="card-text">Title: ${offers.title}</p>
+                        </div>
+                        <div class ="card-footer text-muted">
+                            <p class= "card-text"> Username: ${offers.username}
+                            </div>
+                        <div class ="card-footer text-muted">
+                            <p class= "card-text"> Offer: $${offers.offer}
+                            </div>
+                            <div class ="card-footer text-muted">
+                            <p class= "card-text"> Date: ${offers.created_at}
+                            </div>
+
+                    </div>
+                    `;
+
+                    $("#offers").append(postHtml);
+                });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+
+
+        // ADD PRODUCT LISTING
+        $("#create-post-form").submit((event) => {
+            // prevents the page from refreshing
+            event.preventDefault();
+
+            const requestBody = {
+                title: $("#create-post-form-body").val(),
+                description: $("#description").val(),
+                price: $("#price").val(),
+                fk_user_id: loggedInUserID // change to fk_user_id;
+            };
+
+            // create listing
+            axios.post(`${baseUrl}/listings/`, requestBody)
+                .then((response) => {
+                    // reset form value.
+                    $("#create-post-form-body").val("");
+
+                    // fetch the post with the returned postID
+                    axios.get(postUrl)
+                        .then((response) => {
+                            const listings = response.data[response.data.length - 1];
+                            const postHtml = `
+                            <div class="card col-6" style="margin-top: 2rem; width: 280px">
+                        <div class="card-body">
+                            <p class="card-text">${listings.title}</p>
+                        </div>
+                        <div class ="card=footer text-muted">
+                            ${listings.price}
+                            </div>
+                            <div class="card-footer text-muted">
+                            ${listings.description}
+                        </div>
+                        <div class="card-footer text-muted">
+                            ${listings.created_at}
+                        </div>
+                    </div>
+                    `;
+                            $("#listings").prepend(postHtml);
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+        });
+
+        // logout
+        $("#logout").click((event) => {
+            // prevents the page from refreshing
+            event.preventDefault();
+
+            const requestBody = {  //empty, log out no need amything
+            };
+
+            // create the post
+            axios.post(`${baseUrl}/user/logout`, requestBody)
+                .then((response) => {
+                    window.localStorage.clear()
+                    window.location.href = "/login/"
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+        });
+
+
+
+    </script>
+
+    <!-- Footer -->
+    <footer id="sticky-footer" class="py-4 bg-dark text-white-80">
+        <div class="container text-center">
+            <p>Personal Selling Blog&copy; 2019</p>
+            <i class="fab fa-instagram"></i></a></p>
+        </div>
+        <!--container-->
+    </footer>
+    <!--end of footer-->
+
+    <style>
+        html {
+            color: pink;
+        }
+
+        footer {
+            background: linear-gradient(to top, #33ccff 1%, #ff99cc 100%);
+        }
+    </style>
+
+</body>
+
+</html>
